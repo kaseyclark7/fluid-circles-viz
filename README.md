@@ -5,17 +5,19 @@ An interactive visualization showing circles that grow and shrink fluidly, repre
 ## Features
 
 - **Automatic Animation**: Circles grow and shrink automatically when animation is started
-- **Connection Lines**: Animated lines between related circles that pulse to show relationships
-  - Strong connections: Solid white lines
-  - Medium connections: Dashed light gray lines
-  - Weak connections: Dotted gray lines
+- **People Flow Animation**: 
+  - Dotted lines show paths between circles
+  - Animated particles represent people moving between circles
+  - Circles dynamically resize based on inflow/outflow of people
+  - Source circles get smaller as people leave
+  - Target circles get larger as people arrive
 - **Interactive Controls**: 
   - Start/Stop animation
   - Reset to original sizes
   - Manual size control with slider
   - Select specific circles or all circles
 - **Click Interaction**: Click any circle to toggle between normal and enlarged size
-- **Hover Effects**: Hover over circles to see details and highlight connected lines
+- **Hover Effects**: Hover over circles to see details and highlight connected flow paths
 
 ## How to Use
 

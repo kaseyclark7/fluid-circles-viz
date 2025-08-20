@@ -25,17 +25,17 @@ document.addEventListener('DOMContentLoaded', function() {
         { id: 'tests', name: 'Q\'s Suggested\nTests', color: '#ff7b7b', baseSize: 25, x: centerX - 200, y: centerY + 50 }
     ];
     
-    // Define relationships between circles
-    const relationships = [
-        { source: 'ollie', target: 'conversational', strength: 'strong' },
-        { source: 'ollie', target: 'stability', strength: 'medium' },
-        { source: 'ollie', target: 'liveCall', strength: 'strong' },
-        { source: 'conversational', target: 'qTips', strength: 'medium' },
-        { source: 'conversational', target: 'qmail', strength: 'strong' },
-        { source: 'stability', target: 'qFile', strength: 'medium' },
-        { source: 'liveCall', target: 'borrower', strength: 'strong' },
-        { source: 'qTips', target: 'tests', strength: 'medium' },
-        { source: 'borrower', target: 'qFile', strength: 'weak' }
+    // Define flows between circles (people moving between squads)
+    const flows = [
+        { source: 'ollie', target: 'conversational', flowRate: 5 },
+        { source: 'ollie', target: 'stability', flowRate: 3 },
+        { source: 'ollie', target: 'liveCall', flowRate: 4 },
+        { source: 'conversational', target: 'qTips', flowRate: 2 },
+        { source: 'conversational', target: 'qmail', flowRate: 3 },
+        { source: 'stability', target: 'qFile', flowRate: 2 },
+        { source: 'liveCall', target: 'borrower', flowRate: 4 },
+        { source: 'qTips', target: 'tests', flowRate: 2 },
+        { source: 'borrower', target: 'qFile', flowRate: 1 }
     ];
 
     // Create SVG container
@@ -144,13 +144,24 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('opacity', 1)
             .attr('stroke-width', 3);
             
-        // Highlight connected lines
-        connectionsGroup.selectAll('.connection')
-            .filter(conn => conn.source.id === d.id || conn.target.id === d.id)
+        // Highlight connected flow lines
+        connectionsGroup.selectAll('.flow-line')
+            .filter(flow => flow.source.id === d.id || flow.target.id === d.id)
             .transition()
             .duration(300)
-            .style('opacity', 1)
-            .style('stroke-width', line => line.strength === 'strong' ? 4 : (line.strength === 'medium' ? 3 : 2));
+            .style('opacity', 0.8)
+            .style('stroke-width', 2);
+            
+        // Highlight flow particles
+        connectionsGroup.selectAll('.flow-particle')
+            .filter(function() {
+                const parentData = d3.select(this.parentNode).datum();
+                return parentData && (parentData.source.id === d.id || parentData.target.id === d.id);
+            })
+            .transition()
+            .duration(300)
+            .attr('r', 4)
+            .style('opacity', 1);
             
         tooltip.style('opacity', 1)
             .html(`${d.name}`)
@@ -164,12 +175,19 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('opacity', 0.8)
             .attr('stroke-width', 2);
             
-        // Reset connection lines
-        connectionsGroup.selectAll('.connection')
+        // Reset flow lines
+        connectionsGroup.selectAll('.flow-line')
             .transition()
             .duration(300)
-            .style('opacity', 0.5)
-            .style('stroke-width', line => line.strength === 'strong' ? 3 : (line.strength === 'medium' ? 2 : 1));
+            .style('opacity', 0.4)
+            .style('stroke-width', 1);
+            
+        // Reset flow particles
+        connectionsGroup.selectAll('.flow-particle')
+            .transition()
+            .duration(300)
+            .attr('r', 3)
+            .style('opacity', 0.8);
             
         tooltip.style('opacity', 0);
     })
@@ -203,60 +221,48 @@ document.addEventListener('DOMContentLoaded', function() {
         resetCircles();
     });
     
-    // Create connection lines between related circles
-    function createConnections() {
-        // Process the relationships data to include actual circle objects
-        const connectionData = relationships.map(rel => {
-            const sourceCircle = circleData.find(c => c.id === rel.source);
-            const targetCircle = circleData.find(c => c.id === rel.target);
+    // Create flow lines between circles
+    function createFlowLines() {
+        // Process the flows data to include actual circle objects
+        const flowData = flows.map(flow => {
+            const sourceCircle = circleData.find(c => c.id === flow.source);
+            const targetCircle = circleData.find(c => c.id === flow.target);
             return {
                 source: sourceCircle,
                 target: targetCircle,
-                strength: rel.strength
+                flowRate: flow.flowRate,
+                particles: [] // Will store particle positions for animation
             };
         });
         
-        // Create the connection lines
-        connectionsGroup.selectAll('.connection')
-            .data(connectionData)
+        // Create the flow lines
+        connectionsGroup.selectAll('.flow-line')
+            .data(flowData)
             .enter()
             .append('path')
-            .attr('class', 'connection')
-            .attr('stroke', d => {
-                // Color based on strength
-                if (d.strength === 'strong') return '#ffffff';
-                if (d.strength === 'medium') return '#cccccc';
-                return '#999999';
-            })
-            .attr('stroke-width', d => {
-                // Width based on strength
-                if (d.strength === 'strong') return 3;
-                if (d.strength === 'medium') return 2;
-                return 1;
-            })
+            .attr('class', 'flow-line')
+            .attr('stroke', '#ffffff')
+            .attr('stroke-width', 1)
             .attr('fill', 'none')
-            .style('opacity', 0.5)
-            .style('stroke-dasharray', d => {
-                // Dash pattern based on strength
-                if (d.strength === 'strong') return 'none';
-                if (d.strength === 'medium') return '5,5';
-                return '2,8';
-            })
-            .each(function(d) {
-                // Store the original stroke width for animations
-                d.originalStrokeWidth = d.strength === 'strong' ? 3 : (d.strength === 'medium' ? 2 : 1);
-            });
+            .style('opacity', 0.4)
+            .style('stroke-dasharray', '3,3'); // All lines are dotted
             
-        // Initial positioning of connections
-        updateConnections();
+        // Create particle groups for each flow line
+        const particleGroups = connectionsGroup.selectAll('.particle-group')
+            .data(flowData)
+            .enter()
+            .append('g')
+            .attr('class', 'particle-group');
+            
+        // Initial positioning of flow lines
+        updateFlowLines();
         
-        // Start the pulse animation for connections
-        animateConnections();
+        return flowData;
     }
     
-    // Update connection positions when circles move
-    function updateConnections() {
-        connectionsGroup.selectAll('.connection')
+    // Update flow line positions when circles move
+    function updateFlowLines() {
+        connectionsGroup.selectAll('.flow-line')
             .attr('d', d => {
                 const sourceX = d.source.x;
                 const sourceY = d.source.y;
@@ -287,36 +293,129 @@ document.addEventListener('DOMContentLoaded', function() {
                 const perpX = -dy * curveFactor / distance;
                 const perpY = dx * curveFactor / distance;
                 
+                // Store path data for particle animations
+                d.pathData = {
+                    sourceX: sourceOffsetX,
+                    sourceY: sourceOffsetY,
+                    targetX: targetOffsetX,
+                    targetY: targetOffsetY,
+                    controlX: midX + perpX,
+                    controlY: midY + perpY
+                };
+                
                 return `M${sourceOffsetX},${sourceOffsetY} Q${midX + perpX},${midY + perpY} ${targetOffsetX},${targetOffsetY}`;
             });
     }
     
-    // Animate connections with a pulse effect
-    function animateConnections() {
-        connectionsGroup.selectAll('.connection')
-            .each(function(d) {
-                const line = d3.select(this);
-                
-                // Create a repeating pulse animation
-                function pulse() {
-                    line.transition()
-                        .duration(2000)
-                        .style('opacity', 0.8)
-                        .style('stroke-width', d.originalStrokeWidth * 1.5)
-                        .transition()
-                        .duration(2000)
-                        .style('opacity', 0.5)
-                        .style('stroke-width', d.originalStrokeWidth)
-                        .on('end', pulse);
-                }
-                
-                // Start the pulse with a random delay to prevent all lines pulsing together
-                setTimeout(pulse, Math.random() * 2000);
+    // Animate people flowing between circles
+    function animateFlows(flowData) {
+        // Store circle size changes for each flow cycle
+        const sizeChanges = {};
+        circleData.forEach(circle => {
+            sizeChanges[circle.id] = 0;
+        });
+        
+        // Create particles for each flow line
+        flowData.forEach(flow => {
+            // Number of particles based on flow rate
+            const numParticles = flow.flowRate;
+            flow.particles = [];
+            
+            // Initialize particles at random positions along the path
+            for (let i = 0; i < numParticles; i++) {
+                flow.particles.push({
+                    id: i,
+                    progress: Math.random(), // Random position along the path (0-1)
+                    element: null
+                });
+            }
+            
+            // Create SVG elements for particles
+            const particleGroup = connectionsGroup.select(`.particle-group:nth-child(${flowData.indexOf(flow) + 1})`);
+            
+            flow.particles.forEach(particle => {
+                particle.element = particleGroup.append('circle')
+                    .attr('class', 'flow-particle')
+                    .attr('r', 3)
+                    .attr('fill', '#ffffff')
+                    .style('opacity', 0.8);
             });
+        });
+        
+        // Animation function to update particle positions
+        function animateParticles() {
+            // Reset size changes for this cycle
+            Object.keys(sizeChanges).forEach(id => {
+                sizeChanges[id] = 0;
+            });
+            
+            // Update each flow's particles
+            flowData.forEach(flow => {
+                flow.particles.forEach(particle => {
+                    // Update particle position along the path
+                    particle.progress += 0.01; // Speed of movement
+                    
+                    // When a particle reaches the end
+                    if (particle.progress >= 1) {
+                        // Reset to start
+                        particle.progress = 0;
+                        
+                        // Track size changes: source gets smaller, target gets bigger
+                        sizeChanges[flow.source.id] -= 1;
+                        sizeChanges[flow.target.id] += 1;
+                    }
+                    
+                    // Calculate position on the quadratic curve
+                    if (flow.pathData) {
+                        const t = particle.progress;
+                        const p = flow.pathData;
+                        
+                        // Quadratic Bezier formula: B(t) = (1-t)²P₀ + 2(1-t)tP₁ + t²P₂
+                        const x = Math.pow(1-t, 2) * p.sourceX + 
+                                2 * (1-t) * t * p.controlX + 
+                                Math.pow(t, 2) * p.targetX;
+                                
+                        const y = Math.pow(1-t, 2) * p.sourceY + 
+                                2 * (1-t) * t * p.controlY + 
+                                Math.pow(t, 2) * p.targetY;
+                        
+                        // Update particle position
+                        particle.element
+                            .attr('cx', x)
+                            .attr('cy', y);
+                    }
+                });
+            });
+            
+            // Apply size changes to circles
+            circles.each(function(d) {
+                if (sizeChanges[d.id] !== 0) {
+                    const circle = d3.select(this).select('circle');
+                    const text = d3.select(this).select('text');
+                    const currentSize = parseFloat(circle.attr('r'));
+                    
+                    // Change size based on flow (max 10% change per cycle)
+                    const sizeChange = Math.min(Math.max(sizeChanges[d.id], -2), 2);
+                    const newSize = Math.max(d.baseSize * 0.5, Math.min(d.baseSize * 1.5, currentSize + sizeChange));
+                    
+                    circle.transition()
+                        .duration(500)
+                        .attr('r', newSize);
+                        
+                    text.transition()
+                        .duration(500)
+                        .attr('font-size', Math.max(10, newSize / 5));
+                }
+            });
+        }
+        
+        // Run the animation loop
+        setInterval(animateParticles, 100);
     }
     
-    // Create the connections after circles are created
-    createConnections();
+    // Create flow lines and start animation
+    const flowData = createFlowLines();
+    animateFlows(flowData);
 
     // Function to wrap text
     function wrapText(text, width) {
@@ -382,8 +481,8 @@ document.addEventListener('DOMContentLoaded', function() {
         
         d3.select(this).attr('transform', `translate(${d.x}, ${d.y})`);
         
-        // Update connection lines positions
-        updateConnections();
+        // Update flow lines positions
+        updateFlowLines();
     }
 
     // Add manual control for individual circles
