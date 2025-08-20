@@ -245,7 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('stroke-width', 1)
             .attr('fill', 'none')
             .style('opacity', 0.4)
-            .style('stroke-dasharray', '3,3'); // All lines are dotted
+            .style('stroke-dasharray', d => `${3 + d.flowRate},${6 - d.flowRate/2}`) // Dash pattern based on flow rate
+            .attr('stroke-dashoffset', 0)
             
         // Create particle groups for each flow line
         const particleGroups = connectionsGroup.selectAll('.particle-group')
@@ -315,6 +316,29 @@ document.addEventListener('DOMContentLoaded', function() {
             sizeChanges[circle.id] = 0;
         });
         
+        // Animate flow lines with moving dash pattern
+        connectionsGroup.selectAll('.flow-line')
+            .each(function(d) {
+                const line = d3.select(this);
+                const dashLength = parseFloat(line.style('stroke-dasharray').split(',')[0]) || 3;
+                const dashGap = parseFloat(line.style('stroke-dasharray').split(',')[1]) || 3;
+                const totalLength = dashLength + dashGap;
+                
+                // Animation speed based on flow rate
+                const duration = 3000 - (d.flowRate * 300); // Faster for higher flow rates
+                
+                function animateDashes() {
+                    line.attr('stroke-dashoffset', totalLength)
+                        .transition()
+                        .duration(duration)
+                        .ease(d3.easeLinear)
+                        .attr('stroke-dashoffset', 0)
+                        .on('end', animateDashes);
+                }
+                
+                animateDashes();
+            });
+        
         // Create particles for each flow line
         flowData.forEach(flow => {
             // Number of particles based on flow rate
@@ -351,9 +375,12 @@ document.addEventListener('DOMContentLoaded', function() {
             
             // Update each flow's particles
             flowData.forEach(flow => {
+                // Calculate speed based on flow rate (same as line animation)
+                const speed = 0.005 + (flow.flowRate * 0.002); // Faster for higher flow rates
+                
                 flow.particles.forEach(particle => {
                     // Update particle position along the path
-                    particle.progress += 0.01; // Speed of movement
+                    particle.progress += speed;
                     
                     // When a particle reaches the end
                     if (particle.progress >= 1) {
@@ -409,7 +436,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
         
-        // Run the animation loop
+        // Run the animation loop for particles
         setInterval(animateParticles, 100);
     }
     

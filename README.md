@@ -6,8 +6,9 @@ An interactive visualization showing circles that grow and shrink fluidly, repre
 
 - **Automatic Animation**: Circles grow and shrink automatically when animation is started
 - **People Flow Animation**: 
-  - Dotted lines show paths between circles
-  - Animated particles represent people moving between circles
+  - Animated dotted lines with moving dash patterns show flow direction
+  - Animation speed varies based on flow rate between circles
+  - Animated particles represent people moving along the paths
   - Circles dynamically resize based on inflow/outflow of people
   - Source circles get smaller as people leave
   - Target circles get larger as people arrive
