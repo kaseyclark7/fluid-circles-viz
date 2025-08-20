@@ -24,12 +24,29 @@ document.addEventListener('DOMContentLoaded', function() {
         { id: 'qFile', name: 'Q\'s File\nSummary', color: '#ff7b7b', baseSize: 35, x: centerX + 50, y: centerY + 50 },
         { id: 'tests', name: 'Q\'s Suggested\nTests', color: '#ff7b7b', baseSize: 25, x: centerX - 200, y: centerY + 50 }
     ];
+    
+    // Define relationships between circles
+    const relationships = [
+        { source: 'ollie', target: 'conversational', strength: 'strong' },
+        { source: 'ollie', target: 'stability', strength: 'medium' },
+        { source: 'ollie', target: 'liveCall', strength: 'strong' },
+        { source: 'conversational', target: 'qTips', strength: 'medium' },
+        { source: 'conversational', target: 'qmail', strength: 'strong' },
+        { source: 'stability', target: 'qFile', strength: 'medium' },
+        { source: 'liveCall', target: 'borrower', strength: 'strong' },
+        { source: 'qTips', target: 'tests', strength: 'medium' },
+        { source: 'borrower', target: 'qFile', strength: 'weak' }
+    ];
 
     // Create SVG container
     const svg = container.append('svg')
         .attr('width', width)
         .attr('height', height);
-
+        
+    // Create a group for connections that will be below circles
+    const connectionsGroup = svg.append('g')
+        .attr('class', 'connections');
+        
     // Create tooltip
     const tooltip = container.append('div')
         .attr('class', 'tooltip');
@@ -40,6 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .enter()
         .append('g')
         .attr('class', 'circle-group')
+        .attr('data-id', d => d.id)
         .attr('transform', d => `translate(${d.x}, ${d.y})`)
         .call(drag)
         .style('cursor', 'move');
@@ -126,6 +144,14 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('opacity', 1)
             .attr('stroke-width', 3);
             
+        // Highlight connected lines
+        connectionsGroup.selectAll('.connection')
+            .filter(conn => conn.source.id === d.id || conn.target.id === d.id)
+            .transition()
+            .duration(300)
+            .style('opacity', 1)
+            .style('stroke-width', line => line.strength === 'strong' ? 4 : (line.strength === 'medium' ? 3 : 2));
+            
         tooltip.style('opacity', 1)
             .html(`${d.name}`)
             .style('left', (event.pageX - container.node().offsetLeft + 10) + 'px')
@@ -137,6 +163,13 @@ document.addEventListener('DOMContentLoaded', function() {
             .duration(300)
             .attr('opacity', 0.8)
             .attr('stroke-width', 2);
+            
+        // Reset connection lines
+        connectionsGroup.selectAll('.connection')
+            .transition()
+            .duration(300)
+            .style('opacity', 0.5)
+            .style('stroke-width', line => line.strength === 'strong' ? 3 : (line.strength === 'medium' ? 2 : 1));
             
         tooltip.style('opacity', 0);
     })
@@ -169,6 +202,121 @@ document.addEventListener('DOMContentLoaded', function() {
         stopAnimation();
         resetCircles();
     });
+    
+    // Create connection lines between related circles
+    function createConnections() {
+        // Process the relationships data to include actual circle objects
+        const connectionData = relationships.map(rel => {
+            const sourceCircle = circleData.find(c => c.id === rel.source);
+            const targetCircle = circleData.find(c => c.id === rel.target);
+            return {
+                source: sourceCircle,
+                target: targetCircle,
+                strength: rel.strength
+            };
+        });
+        
+        // Create the connection lines
+        connectionsGroup.selectAll('.connection')
+            .data(connectionData)
+            .enter()
+            .append('path')
+            .attr('class', 'connection')
+            .attr('stroke', d => {
+                // Color based on strength
+                if (d.strength === 'strong') return '#ffffff';
+                if (d.strength === 'medium') return '#cccccc';
+                return '#999999';
+            })
+            .attr('stroke-width', d => {
+                // Width based on strength
+                if (d.strength === 'strong') return 3;
+                if (d.strength === 'medium') return 2;
+                return 1;
+            })
+            .attr('fill', 'none')
+            .style('opacity', 0.5)
+            .style('stroke-dasharray', d => {
+                // Dash pattern based on strength
+                if (d.strength === 'strong') return 'none';
+                if (d.strength === 'medium') return '5,5';
+                return '2,8';
+            })
+            .each(function(d) {
+                // Store the original stroke width for animations
+                d.originalStrokeWidth = d.strength === 'strong' ? 3 : (d.strength === 'medium' ? 2 : 1);
+            });
+            
+        // Initial positioning of connections
+        updateConnections();
+        
+        // Start the pulse animation for connections
+        animateConnections();
+    }
+    
+    // Update connection positions when circles move
+    function updateConnections() {
+        connectionsGroup.selectAll('.connection')
+            .attr('d', d => {
+                const sourceX = d.source.x;
+                const sourceY = d.source.y;
+                const targetX = d.target.x;
+                const targetY = d.target.y;
+                
+                // Calculate the distance between circles
+                const dx = targetX - sourceX;
+                const dy = targetY - sourceY;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                
+                // Calculate the points where the line should start and end
+                // (at the edge of each circle, not the center)
+                const sourceR = parseFloat(d3.select(`g[data-id='${d.source.id}']`).select('circle').attr('r')) || d.source.baseSize;
+                const targetR = parseFloat(d3.select(`g[data-id='${d.target.id}']`).select('circle').attr('r')) || d.target.baseSize;
+                
+                const sourceOffsetX = sourceX + (dx * sourceR / distance);
+                const sourceOffsetY = sourceY + (dy * sourceR / distance);
+                const targetOffsetX = targetX - (dx * targetR / distance);
+                const targetOffsetY = targetY - (dy * targetR / distance);
+                
+                // Create a curved path
+                const midX = (sourceOffsetX + targetOffsetX) / 2;
+                const midY = (sourceOffsetY + targetOffsetY) / 2;
+                const curveFactor = 30; // Controls how much the curve bends
+                
+                // Perpendicular offset for the control point
+                const perpX = -dy * curveFactor / distance;
+                const perpY = dx * curveFactor / distance;
+                
+                return `M${sourceOffsetX},${sourceOffsetY} Q${midX + perpX},${midY + perpY} ${targetOffsetX},${targetOffsetY}`;
+            });
+    }
+    
+    // Animate connections with a pulse effect
+    function animateConnections() {
+        connectionsGroup.selectAll('.connection')
+            .each(function(d) {
+                const line = d3.select(this);
+                
+                // Create a repeating pulse animation
+                function pulse() {
+                    line.transition()
+                        .duration(2000)
+                        .style('opacity', 0.8)
+                        .style('stroke-width', d.originalStrokeWidth * 1.5)
+                        .transition()
+                        .duration(2000)
+                        .style('opacity', 0.5)
+                        .style('stroke-width', d.originalStrokeWidth)
+                        .on('end', pulse);
+                }
+                
+                // Start the pulse with a random delay to prevent all lines pulsing together
+                setTimeout(pulse, Math.random() * 2000);
+            });
+    }
+    
+    // Create the connections after circles are created
+    createConnections();
 
     // Function to wrap text
     function wrapText(text, width) {
@@ -233,6 +381,9 @@ document.addEventListener('DOMContentLoaded', function() {
         if (d.y + r > height) d.y = height - r;
         
         d3.select(this).attr('transform', `translate(${d.x}, ${d.y})`);
+        
+        // Update connection lines positions
+        updateConnections();
     }
 
     // Add manual control for individual circles

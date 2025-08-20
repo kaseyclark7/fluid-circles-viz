@@ -5,13 +5,17 @@ An interactive visualization showing circles that grow and shrink fluidly, repre
 ## Features
 
 - **Automatic Animation**: Circles grow and shrink automatically when animation is started
+- **Connection Lines**: Animated lines between related circles that pulse to show relationships
+  - Strong connections: Solid white lines
+  - Medium connections: Dashed light gray lines
+  - Weak connections: Dotted gray lines
 - **Interactive Controls**: 
   - Start/Stop animation
   - Reset to original sizes
   - Manual size control with slider
   - Select specific circles or all circles
 - **Click Interaction**: Click any circle to toggle between normal and enlarged size
-- **Hover Effects**: Hover over circles to see details
+- **Hover Effects**: Hover over circles to see details and highlight connected lines
 
 ## How to Use
 
