@@ -13,6 +13,7 @@
         <div class="header-container">
             <h1>Brainstorm Squads</h1>
             <button id="info-btn" class="info-button" title="About Brainstorm">ⓘ</button>
+            <button id="lifecycle-btn" class="lifecycle-button" title="Brainstorm Product Lifecycle">🔄</button>
         </div>
         <div class="instructions">
             <p><i class="fa fa-info-circle"></i> Drag circles to reposition them | Select circles to create connections | Use controls below to animate</p>
@@ -49,17 +50,9 @@
         </div>
         <div id="visualization"></div>
         
-        <!-- SDLC Diagram Section -->
-        <div class="sdlc-section">
-            <h2>Brainstorm Product Lifecycle</h2>
-            <div class="sdlc-container">
-                <div class="sdlc-image-wrapper">
-                    <img src="images/brainstorm-sdlc.jpg" alt="Brainstorm Product Lifecycle Diagram" class="sdlc-image">
-                    <button class="fullscreen-btn" id="fullscreen-btn">
-                        <i class="fullscreen-icon">⤢</i>
-                    </button>
-                </div>
-            </div>
+        <!-- Hidden SDLC Image for modal -->
+        <div style="display: none;">
+            <img src="images/brainstorm-sdlc.jpg" alt="Brainstorm Product Lifecycle Diagram" id="sdlc-source-image">
         </div>
         
         <!-- Brainstorm Info Modal -->
@@ -278,14 +271,74 @@
     <!-- Direct script for fullscreen functionality -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const lifecycleBtn = document.getElementById('lifecycle-btn');
             const imageModal = document.getElementById('image-modal');
             const fullscreenImage = document.getElementById('fullscreen-image');
-            const originalImage = document.querySelector('.sdlc-image-wrapper img');
+            const originalImage = document.getElementById('sdlc-source-image');
             const closeImageModal = document.querySelector('.close-image-modal');
             
-            if (fullscreenBtn) {
-                fullscreenBtn.addEventListener('click', function() {
+            function openImageModal() {
+                if (fullscreenImage && originalImage) {
+                    fullscreenImage.src = originalImage.src;
+                }
+                if (imageModal) {
+                    imageModal.style.display = 'block';
+                    document.body.style.overflow = 'hidden';
+                }
+            }
+            
+            function closeImageModal() {
+                if (imageModal) {
+                    imageModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            }
+            
+            // Removed fullscreenBtn reference as it no longer exists
+            
+            if (lifecycleBtn) {
+                console.log('Lifecycle button found');
+                lifecycleBtn.addEventListener('click', function() {
+                    console.log('Lifecycle button clicked');
+                    openImageModal();
+                });
+            } else {
+                console.log('Lifecycle button not found');
+            }
+            
+            const closeBtn = document.querySelector('.close-image-modal');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function() {
+                    closeImageModal();
+                });
+            }
+            
+            // Close when clicking outside the modal
+            window.addEventListener('click', function(event) {
+                if (event.target === imageModal) {
+                    closeImageModal();
+                }
+            });
+            
+            // Close when pressing Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && imageModal.style.display === 'block') {
+                    closeImageModal();
+                }
+            });
+        });
+    </script>
+    
+    <!-- Direct script to ensure lifecycle button works -->
+    <script>
+        window.onload = function() {
+            const lifecycleBtn = document.getElementById('lifecycle-btn');
+            const imageModal = document.getElementById('image-modal');
+            const fullscreenImage = document.getElementById('fullscreen-image');
+            const originalImage = document.getElementById('sdlc-source-image');
+            
+            if (lifecycleBtn) {
+                lifecycleBtn.onclick = function() {
                     if (fullscreenImage && originalImage) {
                         fullscreenImage.src = originalImage.src;
                     }
@@ -293,26 +346,34 @@
                         imageModal.style.display = 'block';
                         document.body.style.overflow = 'hidden';
                     }
-                });
+                };
             }
             
-            if (closeImageModal) {
-                closeImageModal.addEventListener('click', function() {
-                    if (imageModal) {
-                        imageModal.style.display = 'none';
-                        document.body.style.overflow = 'auto';
-                    }
-                });
+            // Add exit functionality
+            const closeBtn = document.querySelector('.close-image-modal');
+            if (closeBtn) {
+                closeBtn.onclick = function() {
+                    imageModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                };
             }
             
             // Close when clicking outside the modal
-            window.addEventListener('click', function(event) {
+            window.onclick = function(event) {
                 if (event.target === imageModal) {
                     imageModal.style.display = 'none';
                     document.body.style.overflow = 'auto';
                 }
+            };
+            
+            // Close when pressing Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && imageModal.style.display === 'block') {
+                    imageModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
             });
-        });
+        };
     </script>
 </body>
 </html>
