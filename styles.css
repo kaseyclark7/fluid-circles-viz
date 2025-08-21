@@ -377,6 +377,46 @@ button.active {
     background: transparent;
 }
 
+/* SDLC Diagram Section Styling */
+.sdlc-section {
+    margin-top: 40px;
+    padding: 20px;
+    background: linear-gradient(135deg, #1a2942, #0f1a2d);
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sdlc-section h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #fff;
+    background: linear-gradient(90deg, #3498db, #2ecc71);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-size: 28px;
+}
+
+.sdlc-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.sdlc-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 8px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    transition: transform 0.3s ease;
+}
+
+.sdlc-image:hover {
+    transform: scale(1.02);
+}
+
 .close-modal {
     position: absolute;
     top: 20px;
