@@ -863,6 +863,98 @@ document.addEventListener('DOMContentLoaded', function() {
     const infoBtn = document.getElementById('info-btn');
     const closeModalBtn = document.querySelector('.close-modal');
     
+    document.addEventListener('DOMContentLoaded', function() {
+        // Get the modal
+        var modal = document.getElementById("myModal");
+
+        // Get the button that opens the modal
+        var btn = document.getElementById("myBtn");
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal 
+        if (btn) {
+            btn.onclick = function() {
+                modal.style.display = "block";
+            }
+        }
+
+        // When the user clicks on <span> (x), close the modal
+        if (span) {
+            span.onclick = function() {
+                modal.style.display = "none";
+            }
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+        
+        // Image Modal Functionality
+        // Get the image modal
+        var imageModal = document.getElementById("image-modal");
+        
+        // Get the fullscreen button
+        var fullscreenBtn = document.getElementById("fullscreen-btn");
+        
+        // Get the image element in the modal
+        var fullscreenImage = document.getElementById("fullscreen-image");
+        
+        // Get the original image
+        var originalImage = document.querySelector(".sdlc-image-wrapper img");
+        
+        // Get the close button for the image modal
+        var closeImageModal = document.getElementsByClassName("close-image-modal")[0];
+        
+        // When the user clicks the fullscreen button, open the image modal
+        console.log('Fullscreen button:', fullscreenBtn);
+        console.log('Image modal:', imageModal);
+        console.log('Fullscreen image:', fullscreenImage);
+        console.log('Original image:', originalImage);
+        
+        if (fullscreenBtn) {
+            fullscreenBtn.onclick = function() {
+                console.log('Fullscreen button clicked');
+                // Set the image source to the original image source
+                if (originalImage && fullscreenImage) {
+                    fullscreenImage.src = originalImage.src;
+                }
+                if (imageModal) {
+                    imageModal.style.display = "block";
+                    document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
+                }
+            }
+            
+            // When the user clicks on the close button, close the image modal
+            if (closeImageModal) {
+                closeImageModal.onclick = function() {
+                    imageModal.style.display = "none";
+                    document.body.style.overflow = 'auto'; // Restore scrolling
+                }
+            }
+            
+            // When the user clicks anywhere outside of the image modal content, close it
+            imageModal.onclick = function(event) {
+                if (event.target == imageModal) {
+                    imageModal.style.display = "none";
+                    document.body.style.overflow = 'auto'; // Restore scrolling
+                }
+            }
+            
+            // Close image modal with Escape key
+            document.addEventListener('keydown', function(event) {
+                if (event.key === 'Escape' && imageModal.style.display === 'block') {
+                    imageModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        }
+    });
+
     // Show modal when info button is clicked
     infoBtn.addEventListener('click', function() {
         infoModal.style.display = 'block';

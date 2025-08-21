@@ -53,7 +53,12 @@
         <div class="sdlc-section">
             <h2>Brainstorm Product Lifecycle</h2>
             <div class="sdlc-container">
-                <img src="images/brainstorm-sdlc.jpg" alt="Brainstorm Product Lifecycle Diagram" class="sdlc-image">
+                <div class="sdlc-image-wrapper">
+                    <img src="images/brainstorm-sdlc.jpg" alt="Brainstorm Product Lifecycle Diagram" class="sdlc-image">
+                    <button class="fullscreen-btn" id="fullscreen-btn">
+                        <i class="fullscreen-icon">⤢</i>
+                    </button>
+                </div>
             </div>
         </div>
         
@@ -239,5 +244,53 @@
         </div>
     </div>
     <script src="script.js"></script>
+    
+    <!-- Image Fullscreen Modal -->
+    <div id="image-modal" class="image-modal">
+        <div class="image-modal-content">
+            <button class="close-image-modal" aria-label="Close image modal" role="button" tabindex="0">&times;</button>
+            <img id="fullscreen-image" src="" alt="Fullscreen Image">
+        </div>
+    </div>
+    
+    <!-- Direct script for fullscreen functionality -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fullscreenBtn = document.getElementById('fullscreen-btn');
+            const imageModal = document.getElementById('image-modal');
+            const fullscreenImage = document.getElementById('fullscreen-image');
+            const originalImage = document.querySelector('.sdlc-image-wrapper img');
+            const closeImageModal = document.querySelector('.close-image-modal');
+            
+            if (fullscreenBtn) {
+                fullscreenBtn.addEventListener('click', function() {
+                    if (fullscreenImage && originalImage) {
+                        fullscreenImage.src = originalImage.src;
+                    }
+                    if (imageModal) {
+                        imageModal.style.display = 'block';
+                        document.body.style.overflow = 'hidden';
+                    }
+                });
+            }
+            
+            if (closeImageModal) {
+                closeImageModal.addEventListener('click', function() {
+                    if (imageModal) {
+                        imageModal.style.display = 'none';
+                        document.body.style.overflow = 'auto';
+                    }
+                });
+            }
+            
+            // Close when clicking outside the modal
+            window.addEventListener('click', function(event) {
+                if (event.target === imageModal) {
+                    imageModal.style.display = 'none';
+                    document.body.style.overflow = 'auto';
+                }
+            });
+        });
+    </script>
 </body>
 </html>
