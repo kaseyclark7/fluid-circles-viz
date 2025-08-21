@@ -857,4 +857,37 @@ document.addEventListener('DOMContentLoaded', function() {
             updateFlowLines();
         }
     }
+    
+    // Info button and modal functionality
+    const infoModal = document.getElementById('info-modal');
+    const infoBtn = document.getElementById('info-btn');
+    const closeModalBtn = document.querySelector('.close-modal');
+    
+    // Show modal when info button is clicked
+    infoBtn.addEventListener('click', function() {
+        infoModal.style.display = 'block';
+        document.body.style.overflow = 'hidden'; // Prevent scrolling behind modal
+    });
+    
+    // Close modal when X is clicked
+    closeModalBtn.addEventListener('click', function() {
+        infoModal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restore scrolling
+    });
+    
+    // Close modal when clicking outside of it
+    window.addEventListener('click', function(event) {
+        if (event.target === infoModal) {
+            infoModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape' && infoModal.style.display === 'block') {
+            infoModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    });
 });
