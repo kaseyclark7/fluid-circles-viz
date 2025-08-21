@@ -12,17 +12,17 @@ document.addEventListener('DOMContentLoaded', function() {
         .on('drag', dragged)
         .on('end', dragEnded);
 
-    // Circle data from the image
+    // Circle data from the image - positions adjusted to prevent overlap
     const circleData = [
-        { id: 'ollie', name: 'Ollie/Comms\nAgentic Squad', color: '#ff7b7b', baseSize: 100, x: centerX - 150, y: centerY - 50 },
-        { id: 'conversational', name: 'Conversational\nOPQ', color: '#ff7b7b', baseSize: 80, x: centerX + 150, y: centerY - 50 },
-        { id: 'stability', name: 'Stability + Offloading', color: '#7bbfff', baseSize: 70, x: centerX + 150, y: centerY + 150 },
-        { id: 'liveCall', name: 'Live Call\nCoaching', color: '#ff7b7b', baseSize: 70, x: centerX - 100, y: centerY + 150 },
-        { id: 'qTips', name: 'Q Tips', color: '#ff7b7b', baseSize: 60, x: centerX + 50, y: centerY + 200 },
+        { id: 'ollie', name: 'Ollie/Comms\nAgentic Squad', color: '#ff7b7b', baseSize: 100, x: centerX - 220, y: centerY - 120 },
+        { id: 'conversational', name: 'Conversational\nOPQ', color: '#ff7b7b', baseSize: 80, x: centerX + 220, y: centerY - 120 },
+        { id: 'stability', name: 'Stability + Offloading', color: '#7bbfff', baseSize: 70, x: centerX + 200, y: centerY + 180 },
+        { id: 'liveCall', name: 'Live Call\nCoaching', color: '#ff7b7b', baseSize: 70, x: centerX - 200, y: centerY + 180 },
+        { id: 'qTips', name: 'Q Tips', color: '#ff7b7b', baseSize: 60, x: centerX + 20, y: centerY + 160 },
         { id: 'qmail', name: 'QMail', color: '#ff7b7b', baseSize: 30, x: centerX, y: centerY - 150 },
-        { id: 'borrower', name: 'Borrower Profile\nBlueprint', color: '#ff7b7b', baseSize: 40, x: centerX - 50, y: centerY + 50 },
-        { id: 'qFile', name: 'Q\'s File\nSummary', color: '#ff7b7b', baseSize: 35, x: centerX + 50, y: centerY + 50 },
-        { id: 'tests', name: 'Q\'s Suggested\nTests', color: '#ff7b7b', baseSize: 25, x: centerX - 200, y: centerY + 50 }
+        { id: 'borrower', name: 'Borrower Profile\nBlueprint', color: '#ff7b7b', baseSize: 40, x: centerX - 120, y: centerY + 40 },
+        { id: 'qFile', name: 'Q\'s File\nSummary', color: '#ff7b7b', baseSize: 35, x: centerX + 120, y: centerY + 40 },
+        { id: 'tests', name: 'Q\'s Suggested\nTests', color: '#ff7b7b', baseSize: 25, x: centerX - 280, y: centerY + 40 }
     ];
     
     // Initialize empty flows array - connections will be added by user selection
@@ -346,6 +346,21 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Create flow lines between circles
     function createFlowLines() {
+        // Define arrow marker for flow direction
+        svg.append('defs').selectAll('marker')
+            .data(['flow-marker'])
+            .enter().append('marker')
+            .attr('id', d => d)
+            .attr('viewBox', '0 -5 10 10')
+            .attr('refX', 8)
+            .attr('refY', 0)
+            .attr('markerWidth', 6)
+            .attr('markerHeight', 6)
+            .attr('orient', 'auto')
+            .append('path')
+            .attr('class', 'flow-arrow')
+            .attr('d', 'M0,-5L10,0L0,5');
+            
         // Process the flows data to include actual circle objects
         const flowData = flows.map(flow => {
             const sourceCircle = circleData.find(c => c.id === flow.source);
@@ -365,8 +380,9 @@ document.addEventListener('DOMContentLoaded', function() {
             .append('path')
             .attr('class', 'flow-line')
             .attr('stroke', '#ffffff')
-            .attr('stroke-width', 1)
+            .attr('stroke-width', d => 1 + d.flowRate * 0.2) // Thicker lines for higher flow rates
             .attr('fill', 'none')
+            .attr('marker-end', 'url(#flow-marker)') // Add arrow marker
             .style('opacity', 0.4)
             .style('stroke-dasharray', d => `${3 + d.flowRate},${6 - d.flowRate/2}`) // Dash pattern based on flow rate
             .attr('stroke-dashoffset', 0);
@@ -481,11 +497,16 @@ document.addEventListener('DOMContentLoaded', function() {
             const particleGroup = connectionsGroup.select(`.particle-group:nth-child(${flowData.indexOf(flow) + 1})`);
 
             flow.particles.forEach(particle => {
+                // Size based on progress - smaller at start, larger at end
+                const baseSize = 2 + flow.flowRate * 0.3;
                 particle.element = particleGroup.append('circle')
                     .attr('class', 'flow-particle')
-                    .attr('r', 3)
+                    .attr('r', baseSize)
                     .attr('fill', '#ffffff')
                     .style('opacity', 0.8);
+                
+                // Store base size for animation
+                particle.baseSize = baseSize;
             });
         });
 
@@ -525,18 +546,27 @@ document.addEventListener('DOMContentLoaded', function() {
                         const p2x = flow.pathData.targetX;
                         const p2y = flow.pathData.targetY;
                         
-                        // Quadratic Bezier formula: B(t) = (1-t)Â²Pâ‚€ + 2(1-t)tPâ‚ + tÂ²Pâ‚‚
+                        // Quadratic Bezier formula: B(t) = (1-t)²P₀ + 2(1-t)tP₁ + t²P₂
                         const x = Math.pow(1-t, 2) * p0x + 2 * (1-t) * t * p1x + Math.pow(t, 2) * p2x;
                         const y = Math.pow(1-t, 2) * p0y + 2 * (1-t) * t * p1y + Math.pow(t, 2) * p2y;
                         
-                        // Update particle position
+                        // Size increases as particle moves toward target
+                        const sizeMultiplier = 1 + t * 0.8; // 1.0 at source, 1.8 at target
+                        const particleSize = particle.baseSize * sizeMultiplier;
+                        
+                        // Opacity increases slightly toward target
+                        const opacity = 0.7 + t * 0.3;
+                        
+                        // Update particle position and appearance
                         particle.element
                             .attr('cx', x)
-                            .attr('cy', y);
+                            .attr('cy', y)
+                            .attr('r', particleSize)
+                            .style('opacity', opacity);
                     }
                 });
             });
-
+            
             // Update circle sizes based on flow
             updateCircleSizesFromFlow(sizeChanges);
             

@@ -2,29 +2,39 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f0f0f0;
+    background-color: #121212;
+    color: #e0e0e0;
+    min-height: 100vh;
+    background-image: linear-gradient(to bottom right, #121212, #1e1e1e, #121212);
 }
 
 .container {
-    max-width: 1000px;
+    max-width: 1200px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 30px 20px;
+    box-sizing: border-box;
 }
 
 h1 {
     text-align: center;
-    color: #333;
+    color: #ffffff;
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+    letter-spacing: 1px;
+    text-shadow: 0 0 10px rgba(255,255,255,0.2);
 }
 
 .instructions {
     text-align: center;
-    margin-bottom: 15px;
-    color: #555;
+    margin-bottom: 20px;
+    color: #e0e0e0;
     font-size: 14px;
-    background-color: #f8f8f8;
-    border-radius: 4px;
-    padding: 8px;
+    background-color: rgba(30, 30, 30, 0.7);
+    border-radius: 8px;
+    padding: 12px;
     border-left: 4px solid #4285f4;
+    backdrop-filter: blur(5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
 .instructions i {
@@ -33,18 +43,23 @@ h1 {
 }
 
 .connection-panel {
-    background-color: #f8f8f8;
-    border-radius: 8px;
-    padding: 15px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    background-color: rgba(30, 30, 30, 0.7);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .connection-panel h3 {
     margin-top: 0;
-    margin-bottom: 15px;
-    color: #333;
+    margin-bottom: 20px;
+    color: #ffffff;
     text-align: center;
+    font-size: 1.4rem;
+    letter-spacing: 0.5px;
+    text-shadow: 0 0 5px rgba(255,255,255,0.2);
 }
 
 .connection-controls {
@@ -62,10 +77,20 @@ h1 {
 }
 
 .connection-selector select {
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    min-width: 150px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid rgba(255,255,255,0.2);
+    min-width: 160px;
+    background-color: rgba(20, 20, 20, 0.8);
+    color: #e0e0e0;
+    font-size: 14px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    transition: all 0.3s ease;
 }
 
 .flow-rate-control {
@@ -75,39 +100,133 @@ h1 {
 }
 
 .flow-rate-control input {
-    width: 100px;
+    width: 120px;
+    height: 6px;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    background: linear-gradient(to right, #4285f4, #34a853);
+    border-radius: 3px;
+    outline: none;
+}
+
+.flow-rate-control input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    cursor: pointer;
+    box-shadow: 0 0 5px rgba(0,0,0,0.3);
+    transition: all 0.2s;
+}
+
+.flow-rate-control input::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+}
+
+#flow-rate-value {
+    color: #ffffff;
+    font-weight: bold;
+    min-width: 20px;
+    text-align: center;
 }
 
 .controls {
     display: flex;
     justify-content: center;
-    margin-bottom: 20px;
-    gap: 10px;
+    margin-bottom: 30px;
+    gap: 15px;
 }
 
 button {
-    padding: 10px 15px;
-    background-color: #4285f4;
+    padding: 12px 20px;
+    background-color: rgba(66, 133, 244, 0.8);
     color: white;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 16px;
-    transition: background-color 0.3s;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+}
+
+button:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    transition: all 0.6s;
+    z-index: -1;
 }
 
 button:hover {
-    background-color: #3367d6;
+    background-color: rgba(51, 103, 214, 0.9);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+}
+
+button:hover:before {
+    left: 100%;
+}
+
+button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+#add-connection-btn {
+    background-color: rgba(52, 168, 83, 0.8);
+}
+
+#add-connection-btn:hover {
+    background-color: rgba(30, 142, 62, 0.9);
+}
+
+#random-connections-btn {
+    background-color: rgba(251, 188, 5, 0.8);
+    color: #333;
+}
+
+#random-connections-btn:hover {
+    background-color: rgba(241, 178, 5, 0.9);
+}
+
+#clear-connections-btn {
+    background-color: rgba(234, 67, 53, 0.8);
+}
+
+#clear-connections-btn:hover {
+    background-color: rgba(214, 47, 33, 0.9);
+}
+
+#animate-btn {
+    background-color: rgba(66, 133, 244, 0.8);
+}
+
+#reset-btn {
+    background-color: rgba(95, 99, 104, 0.8);
 }
 
 #visualization {
     width: 100%;
     height: 600px;
-    background-color: #5b7bd5; /* Blue background similar to the image */
+    background-color: #1a2942; /* Darker blue background */
+    background-image: radial-gradient(circle at center, #2a3f5f, #1a2942);
     border-radius: 50%;
     margin: 0 auto;
     position: relative;
     overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 100px rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.1);
 }
 
 .circle {
@@ -119,19 +238,63 @@ button:hover {
     color: white;
     font-weight: bold;
     text-align: center;
-    transition: all 1s ease-in-out;
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
     cursor: pointer;
     user-select: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3), inset 0 0 15px rgba(255,255,255,0.2);
+    overflow: hidden;
+}
+
+/* Add a subtle inner glow to circles */
+.circle circle {
+    transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    filter: drop-shadow(0 0 5px rgba(255,255,255,0.3));
+}
+
+/* Enhance circle text */
+.circle text {
+    font-weight: 600;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+    transition: all 0.8s ease;
 }
 
 .tooltip {
     position: absolute;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: rgba(20, 20, 20, 0.9);
     color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
+    padding: 8px 12px;
+    border-radius: 6px;
     font-size: 14px;
     pointer-events: none;
     opacity: 0;
-    transition: opacity 0.3s;
+    transition: opacity 0.3s, transform 0.3s;
+    transform: translateY(10px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    border: 1px solid rgba(255,255,255,0.1);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+}
+
+/* Add styles for flow lines and particles */
+.flow-line {
+    stroke-dasharray: 5, 5;
+    animation: flowDash 30s linear infinite;
+    filter: drop-shadow(0 0 3px rgba(255,255,255,0.3));
+}
+
+@keyframes flowDash {
+    to {
+        stroke-dashoffset: -1000; /* Negative for source to target direction */
+    }
+}
+
+.flow-particle {
+    filter: drop-shadow(0 0 2px rgba(255,255,255,0.5));
+    transition: r 0.3s ease;
+}
+
+/* Add arrow markers to flow lines */
+.flow-arrow {
+    fill: white;
+    opacity: 0.8;
 }
