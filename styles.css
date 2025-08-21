@@ -403,14 +403,20 @@ button.active {
     justify-content: center;
     align-items: center;
     padding: 10px;
+    max-width: 1000px;
+    margin: 0 auto;
+    overflow: hidden;
 }
 
 .sdlc-image {
     max-width: 100%;
     height: auto;
+    max-height: 800px;
+    width: auto;
     border-radius: 8px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
     transition: transform 0.3s ease;
+    object-fit: contain;
 }
 
 .sdlc-image:hover {
