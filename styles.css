@@ -734,6 +734,49 @@ button.active {
     opacity: 0.8;
 }
 
+/* ESO Squad Styling */
+.eso-heading {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #e0e0e0;
+    border-bottom: 2px solid rgba(46, 204, 113, 0.5);
+    padding-bottom: 5px;
+    display: inline-block;
+}
+
+.eso-mission {
+    background: rgba(46, 204, 113, 0.05);
+    border: 1px solid rgba(46, 204, 113, 0.1);
+}
+
+.eso-mission-content {
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.02);
+    border-radius: 6px;
+}
+
+.eso-mission-content p {
+    margin-bottom: 8px;
+}
+
+.eso-mission-content p:last-child {
+    margin-bottom: 0;
+}
+
+.focus-areas-container {
+    margin-top: 20px;
+}
+
+.focus-areas-label {
+    font-weight: bold;
+    font-size: 1em;
+    margin-bottom: 10px;
+    color: #2ecc71;
+    display: inline-block;
+    border-bottom: 1px solid rgba(46, 204, 113, 0.5);
+    padding-bottom: 3px;
+}
+
 /* ESO Focus Cards Styling */
 .eso-focus-cards {
     display: flex;
@@ -777,29 +820,31 @@ button.active {
 
 /* Implications Section Styling */
 .implications-section {
-    background: linear-gradient(135deg, rgba(41, 128, 185, 0.1), rgba(44, 62, 80, 0.1));
-    border: 1px solid rgba(41, 128, 185, 0.2);
-    padding: 30px;
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.05), rgba(44, 62, 80, 0.05));
+    border: 1px solid rgba(41, 128, 185, 0.15);
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
 }
 
 .implications-header {
-    font-size: 28px;
+    font-size: 24px;
     text-align: center;
-    margin-bottom: 25px;
+    margin-bottom: 20px;
     color: transparent;
     background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
     -webkit-background-clip: text;
     background-clip: text;
     position: relative;
+    display: inline-block;
 }
 
 .implications-header::after {
     content: '';
     position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
+    bottom: -8px;
+    left: 0;
+    width: 100%;
     height: 3px;
     background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
     border-radius: 3px;
@@ -807,20 +852,21 @@ button.active {
 
 .implications-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-top: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
 }
 
 .implication-card {
     background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 20px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-    transition: all 0.5s ease;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
     border: 1px solid rgba(255, 255, 255, 0.08);
     position: relative;
     overflow: hidden;
+    opacity: 1;
 }
 
 .implication-card::before {
@@ -868,27 +914,411 @@ button.active {
     color: #3498db;
 }
 
-/* Animation classes */
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+/* Team Structure Section Styling */
+.team-structure-section {
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.1), rgba(44, 62, 80, 0.1));
+    border: 1px solid rgba(41, 128, 185, 0.2);
+    padding: 30px;
 }
 
-@keyframes slideIn {
-    from { transform: translateX(-30px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+.team-structure-header {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 25px;
+    color: transparent;
+    background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
+    -webkit-background-clip: text;
+    background-clip: text;
+    position: relative;
 }
 
-@keyframes scaleIn {
-    from { transform: scale(0.8); opacity: 0; }
-    to { transform: scale(1); opacity: 1; }
+.team-structure-header::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
+    border-radius: 3px;
 }
 
-@keyframes bounceIn {
-    0% { transform: scale(0.3); opacity: 0; }
-    50% { transform: scale(1.05); }
-    70% { transform: scale(0.9); }
+.team-structure-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.team-structure-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.5s ease;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.team-structure-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+}
+
+.team-structure-card strong {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 10px;
+    color: #fff;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.team-structure-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Innovation Squads Section Styling */
+.innovation-squads-section {
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.1), rgba(44, 62, 80, 0.1));
+    border: 1px solid rgba(41, 128, 185, 0.2);
+    padding: 30px;
+}
+
+.innovation-squads-header {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 25px;
+    color: transparent;
+    background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
+    -webkit-background-clip: text;
+    background-clip: text;
+    position: relative;
+}
+
+.innovation-squads-header::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
+    border-radius: 3px;
+}
+
+.innovation-squads-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.innovation-squads-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.5s ease;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.innovation-squads-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+}
+
+.innovation-squads-card strong {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 10px;
+    color: #fff;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.innovation-squads-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Team Structure Styling */
+.org-model-section {
+    position: relative;
+    border-radius: 12px;
+    background: rgba(41, 128, 185, 0.05);
+    border: 1px solid rgba(41, 128, 185, 0.1);
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.org-subsection {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gradient-text {
+    background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    display: inline-block;
+}
+
+.team-structure-container {
+    margin-top: 15px;
+}
+
+.fluid-team-heading {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #e0e0e0;
+    border-bottom: 2px solid rgba(52, 152, 219, 0.5);
+    padding-bottom: 8px;
+    display: inline-block;
+}
+
+.team-structure-card {
+    background: rgba(41, 128, 185, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #3498db;
+}
+
+.team-stat {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.stat-number {
+    font-size: 2.2em;
+    font-weight: bold;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-right: 10px;
+}
+
+.stat-label {
+    font-size: 1.1em;
+    color: #e0e0e0;
+}
+
+.team-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.team-feature {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    padding: 12px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.feature-icon {
+    font-size: 1.5em;
+    margin-bottom: 8px;
+}
+
+.team-feature:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.slide-in-right {
+    animation: slideInRight 0.6s ease-out forwards;
+    opacity: 0;
+    animation-delay: 0.3s;
+}
+
+.slide-in-left {
+    animation: slideInLeft 0.6s ease-out forwards;
+    opacity: 0;
+    animation-delay: 0.5s;
+}
+
+.float-in {
+    animation: floatIn 0.8s ease-out forwards;
+}
+
+/* Innovation Section Styling */
+.innovation-section {
+    background: rgba(142, 68, 173, 0.05);
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 30px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(142, 68, 173, 0.1);
+}
+
+.innovation-heading {
+    font-size: 1.2em;
+    margin-bottom: 15px;
+    color: #e0e0e0;
+    border-bottom: 2px solid rgba(142, 68, 173, 0.5);
+    padding-bottom: 5px;
+    display: inline-block;
+}
+
+.mission-container {
+    margin-bottom: 15px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 10px;
+    border-radius: 6px;
+}
+
+.mission-label {
+    font-weight: bold;
+    font-size: 1em;
+    margin-bottom: 8px;
+    color: #3498db;
+}
+
+.mission-path {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px;
+}
+
+.mission-step {
+    background: rgba(52, 152, 219, 0.15);
+    padding: 6px 10px;
+    border-radius: 4px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border-left: 2px solid #3498db;
+    font-size: 0.9em;
+}
+
+.mission-step:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+    background: rgba(52, 152, 219, 0.25);
+}
+
+.arrow {
+    color: #3498db;
+    font-size: 0.9em;
+}
+
+.principles-container {
+    margin-top: 15px;
+}
+
+.principles-heading {
+    font-size: 1em;
+    margin-bottom: 10px;
+    color: #e0e0e0;
+}
+
+.principles-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 10px;
+}
+
+.principle-card {
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 10px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border-left: 2px solid #9b59b6;
+    opacity: 1; /* Make sure cards are visible */
+}
+
+.principle-card p {
+    font-size: 0.9em;
+    margin: 0;
+}
+
+.principle-icon {
+    font-size: 1.3em;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.principle-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.pop-in {
+    animation: popIn 0.6s ease-out forwards;
+}
+
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+}
+
+
+@keyframes floatIn {
+    0% { transform: translateY(30px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInRight {
+    0% { transform: translateX(30px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInLeft {
+    0% { transform: translateX(-30px); opacity: 0; }
+    100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeInUp {
+    0% { transform: translateY(20px); opacity: 0; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes popIn {
+    0% { transform: scale(0.6); opacity: 0; }
+    70% { transform: scale(1.1); }
     100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1); }
+    70% { box-shadow: 0 0 0 10px rgba(255, 255, 255, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
 }
 
 .fade-in {
