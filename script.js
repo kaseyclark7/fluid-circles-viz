@@ -228,6 +228,83 @@ document.addEventListener('DOMContentLoaded', function() {
         resetCircles();
     });
 
+    // Simulation functionality
+    let simulationRunning = false;
+    let simulationRound = 0;
+    const maxSimulationRounds = 5;
+    let simulationInterval;
+    
+    function runSimulation() {
+        if (simulationRunning) {
+            stopSimulation();
+            return;
+        }
+        
+        simulationRunning = true;
+        document.getElementById('simulate-btn').textContent = 'Stop Simulation';
+        document.getElementById('simulate-btn').classList.add('active');
+        
+        // Start the simulation process
+        simulationRound = 0;
+        nextSimulationRound();
+    }
+    
+    function stopSimulation() {
+        clearTimeout(simulationInterval);
+        simulationRunning = false;
+        document.getElementById('simulate-btn').textContent = 'Simulate';
+        document.getElementById('simulate-btn').classList.remove('active');
+        stopAnimation();
+    }
+    
+    function nextSimulationRound() {
+        if (!simulationRunning || simulationRound >= maxSimulationRounds) {
+            stopSimulation();
+            return;
+        }
+        
+        simulationRound++;
+        
+        // Clear previous connections
+        clearConnections();
+        
+        // Reset circles to original sizes
+        resetCircles();
+        
+        // Create new random connections
+        createRandomConnections();
+        
+        // Start animation for this round
+        startAnimation();
+        
+        // Force circle size adjustment for each round
+        adjustCircleSizesBasedOnConnections();
+        
+        // Show round number in the center of visualization
+        const roundIndicator = document.createElement('div');
+        roundIndicator.className = 'round-indicator';
+        roundIndicator.textContent = `Round ${simulationRound} of ${maxSimulationRounds}`;
+        document.getElementById('visualization').appendChild(roundIndicator);
+        
+        // Remove the indicator after a delay
+        setTimeout(() => {
+            if (roundIndicator.parentNode) {
+                roundIndicator.parentNode.removeChild(roundIndicator);
+            }
+        }, 3000);
+        
+        // Schedule next round
+        simulationInterval = setTimeout(nextSimulationRound, 5000);
+    }
+    
+    document.getElementById('simulate-btn').addEventListener('click', runSimulation);
+
+    document.getElementById('reset-btn').addEventListener('click', function() {
+        stopAnimation();
+        stopSimulation();
+        resetCircles();
+    });
+
     // Flow rate slider value display
     document.getElementById('flow-rate').addEventListener('input', function() {
         document.getElementById('flow-rate-value').textContent = this.value;
@@ -273,6 +350,11 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Clear all connections button handler
     document.getElementById('clear-connections-btn').addEventListener('click', function() {
+        clearConnections();
+    });
+    
+    // Function to clear all connections
+    function clearConnections() {
         // Clear all connections
         flows.length = 0;
         activeConnections.clear();
@@ -285,10 +367,15 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Reset circle highlights
         circles.selectAll('circle').attr('stroke', '#fff').attr('stroke-width', 2);
-    });
+    }
     
     // Random connections button handler
     document.getElementById('random-connections-btn').addEventListener('click', function() {
+        createRandomConnections();
+    });
+    
+    // Function to create random connections
+    function createRandomConnections() {
         // Clear existing connections first
         flows.length = 0;
         activeConnections.clear();
@@ -327,7 +414,37 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update the visualization
         updateVisualization();
-    });
+    }
+    
+    // Function to adjust circle sizes based on connections
+    function adjustCircleSizesBasedOnConnections() {
+        // Create a map to track flow in/out for each circle
+        const flowMap = new Map();
+        
+        // Initialize flow map with all circles
+        circleData.forEach(circle => {
+            flowMap.set(circle.id, { inFlow: 0, outFlow: 0 });
+        });
+        
+        // Calculate total in/out flow for each circle
+        flows.forEach(flow => {
+            const sourceFlow = flowMap.get(flow.source);
+            const targetFlow = flowMap.get(flow.target);
+            
+            sourceFlow.outFlow += flow.flowRate;
+            targetFlow.inFlow += flow.flowRate;
+        });
+        
+        // Adjust circle sizes based on flow
+        circles.selectAll('circle')
+            .transition()
+            .duration(1000)
+            .attr('r', d => {
+                const flow = flowMap.get(d.id);
+                const netFlow = flow.inFlow - flow.outFlow;
+                return d.baseRadius + (netFlow * 2); // Adjust size based on net flow
+            });
+    }
 
     // Update the entire visualization
     function updateVisualization() {
