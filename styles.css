@@ -639,7 +639,8 @@ button.active {
 }
 
 .alignment-cards p:hover,
-.focus-area-cards p:hover {
+.focus-area-cards p:hover,
+.eso-card:hover {
     background: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
@@ -731,4 +732,183 @@ button.active {
 .flow-arrow {
     fill: white;
     opacity: 0.8;
+}
+
+/* ESO Focus Cards Styling */
+.eso-focus-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 15px 0;
+}
+
+.eso-card {
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.2), rgba(46, 204, 113, 0.2));
+    border-radius: 10px;
+    padding: 12px 18px;
+    margin: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.4s ease;
+    flex: 1 1 calc(50% - 15px);
+    min-width: 200px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.eso-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(to bottom, #3498db, #2ecc71);
+    opacity: 0.8;
+}
+
+.eso-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, rgba(52, 152, 219, 0.3), rgba(46, 204, 113, 0.3));
+}
+
+/* Implications Section Styling */
+.implications-section {
+    background: linear-gradient(135deg, rgba(41, 128, 185, 0.1), rgba(44, 62, 80, 0.1));
+    border: 1px solid rgba(41, 128, 185, 0.2);
+    padding: 30px;
+}
+
+.implications-header {
+    font-size: 28px;
+    text-align: center;
+    margin-bottom: 25px;
+    color: transparent;
+    background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
+    -webkit-background-clip: text;
+    background-clip: text;
+    position: relative;
+}
+
+.implications-header::after {
+    content: '';
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 120px;
+    height: 3px;
+    background: linear-gradient(90deg, #3498db, #9b59b6, #2ecc71);
+    border-radius: 3px;
+}
+
+.implications-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-top: 30px;
+}
+
+.implication-card {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.5s ease;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    position: relative;
+    overflow: hidden;
+}
+
+.implication-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+}
+
+.implication-card strong {
+    font-size: 18px;
+    display: block;
+    margin-bottom: 10px;
+    color: #fff;
+    background: linear-gradient(90deg, #3498db, #9b59b6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.implication-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.2);
+}
+
+.implication-benefits {
+    margin-top: 10px;
+    padding-left: 5px;
+}
+
+.implication-benefits li {
+    margin-bottom: 8px;
+    position: relative;
+    padding-left: 20px;
+    list-style-type: none;
+}
+
+.implication-benefits li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: #3498db;
+}
+
+/* Animation classes */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes slideIn {
+    from { transform: translateX(-30px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+    from { transform: scale(0.8); opacity: 0; }
+    to { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounceIn {
+    0% { transform: scale(0.3); opacity: 0; }
+    50% { transform: scale(1.05); }
+    70% { transform: scale(0.9); }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.fade-in {
+    animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.slide-in {
+    animation: slideIn 0.8s ease-in-out forwards;
+    animation-delay: 0.2s;
+    opacity: 0;
+}
+
+.scale-in {
+    animation: scaleIn 0.8s ease-in-out forwards;
+    animation-delay: 0.4s;
+    opacity: 0;
+}
+
+.bounce-in {
+    animation: bounceIn 1s ease-in-out forwards;
+    animation-delay: 0.6s;
+    opacity: 0;
 }
