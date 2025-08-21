@@ -12,7 +12,32 @@
     <div class="container">
         <h1>Brainstorm Squads</h1>
         <div class="instructions">
-            <p><i class="fa fa-info-circle"></i> Drag circles to reposition them | Click to resize | Use controls below to animate</p>
+            <p><i class="fa fa-info-circle"></i> Drag circles to reposition them | Select circles to create connections | Use controls below to animate</p>
+        </div>
+        <div class="connection-panel">
+            <h3>Create Connections</h3>
+            <div class="connection-controls">
+                <div class="connection-selector">
+                    <label for="source-select">From:</label>
+                    <select id="source-select">
+                        <option value="">Select source...</option>
+                    </select>
+                </div>
+                <div class="connection-selector">
+                    <label for="target-select">To:</label>
+                    <select id="target-select">
+                        <option value="">Select target...</option>
+                    </select>
+                </div>
+                <div class="flow-rate-control">
+                    <label for="flow-rate">Flow Rate:</label>
+                    <input type="range" id="flow-rate" min="1" max="5" value="3">
+                    <span id="flow-rate-value">3</span>
+                </div>
+                <button id="add-connection-btn">Add Connection</button>
+                <button id="random-connections-btn">Random Connections</button>
+                <button id="clear-connections-btn">Clear All</button>
+            </div>
         </div>
         <div class="controls">
             <button id="animate-btn">Start Animation</button>

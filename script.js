@@ -25,19 +25,34 @@ document.addEventListener('DOMContentLoaded', function() {
         { id: 'tests', name: 'Q\'s Suggested\nTests', color: '#ff7b7b', baseSize: 25, x: centerX - 200, y: centerY + 50 }
     ];
     
-    // Define flows between circles (people moving between squads)
-    const flows = [
-        { source: 'ollie', target: 'conversational', flowRate: 5 },
-        { source: 'ollie', target: 'stability', flowRate: 3 },
-        { source: 'ollie', target: 'liveCall', flowRate: 4 },
-        { source: 'conversational', target: 'qTips', flowRate: 2 },
-        { source: 'conversational', target: 'qmail', flowRate: 3 },
-        { source: 'stability', target: 'qFile', flowRate: 2 },
-        { source: 'liveCall', target: 'borrower', flowRate: 4 },
-        { source: 'qTips', target: 'tests', flowRate: 2 },
-        { source: 'borrower', target: 'qFile', flowRate: 1 }
-    ];
+    // Initialize empty flows array - connections will be added by user selection
+    const flows = [];
 
+    // Store active connections to prevent duplicates
+    const activeConnections = new Set();
+    
+    // Track selected circles for connections
+    let selectedSource = null;
+    let selectedTarget = null;
+
+    // Populate the dropdown selectors with circle options
+    const sourceSelect = document.getElementById('source-select');
+    const targetSelect = document.getElementById('target-select');
+    
+    circleData.forEach(circle => {
+        // Add to source dropdown
+        const sourceOption = document.createElement('option');
+        sourceOption.value = circle.id;
+        sourceOption.textContent = circle.name.split('\n')[0]; // Use first line of name
+        sourceSelect.appendChild(sourceOption);
+        
+        // Add to target dropdown
+        const targetOption = document.createElement('option');
+        targetOption.value = circle.id;
+        targetOption.textContent = circle.name.split('\n')[0]; // Use first line of name
+        targetSelect.appendChild(targetOption);
+    });
+    
     // Create SVG container
     const svg = container.append('svg')
         .attr('width', width)
@@ -60,7 +75,7 @@ document.addEventListener('DOMContentLoaded', function() {
         .attr('data-id', d => d.id)
         .attr('transform', d => `translate(${d.x}, ${d.y})`)
         .call(drag)
-        .style('cursor', 'move');
+        .style('cursor', 'pointer'); // Change to pointer to indicate clickable
 
     circles.append('circle')
         .attr('r', d => d.baseSize)
@@ -90,27 +105,12 @@ document.addEventListener('DOMContentLoaded', function() {
         animationRunning = true;
         document.getElementById('animate-btn').textContent = 'Stop Animation';
         
-        animationInterval = setInterval(() => {
-            // Update circle sizes randomly
-            circles.each(function(d) {
-                const circle = d3.select(this).select('circle');
-                const text = d3.select(this).select('text');
-                
-                // Random size change between 70% and 130% of base size
-                const newSize = d.baseSize * (0.7 + Math.random() * 0.6);
-                
-                circle.transition()
-                    .duration(2000)
-                    .ease(d3.easeCubicInOut)
-                    .attr('r', newSize);
-                
-                // Update text size proportionally
-                text.transition()
-                    .duration(2000)
-                    .ease(d3.easeCubicInOut)
-                    .attr('font-size', Math.max(10, newSize / 5));
-            });
-        }, 3000);
+        // Initial size adjustment based on connections
+        // Make source circles smaller and target circles bigger
+        adjustCircleSizesBasedOnConnections();
+        
+        // Continue animating the flow particles but not the circle sizes
+        // The animationRunning flag will still be true to keep particles moving
     }
 
     // Stop animation
@@ -125,6 +125,9 @@ document.addEventListener('DOMContentLoaded', function() {
         circles.each(function(d) {
             const circle = d3.select(this).select('circle');
             const text = d3.select(this).select('text');
+            
+            // Reset to base size
+            d.currentSize = d.baseSize;
             
             circle.transition()
                 .duration(1000)
@@ -192,19 +195,23 @@ document.addEventListener('DOMContentLoaded', function() {
         tooltip.style('opacity', 0);
     })
     .on('click', function(event, d) {
-        // On click, make this circle grow or shrink dramatically
-        const circle = d3.select(this).select('circle');
-        const text = d3.select(this).select('text');
-        const currentSize = parseFloat(circle.attr('r'));
-        const newSize = currentSize === d.baseSize ? d.baseSize * 1.5 : d.baseSize;
-        
-        circle.transition()
-            .duration(800)
-            .attr('r', newSize);
-            
-        text.transition()
-            .duration(800)
-            .attr('font-size', Math.max(10, newSize / 5));
+        // On click, select this circle for creating connections
+        const circleElement = d3.select(this);
+
+        // Highlight the selected circle
+        circles.selectAll('circle').attr('stroke', '#fff');
+        circleElement.select('circle').attr('stroke', '#ffcc00').attr('stroke-width', 3);
+
+        // Update the dropdown selection
+        if (!sourceSelect.value) {
+            sourceSelect.value = d.id;
+        } else if (!targetSelect.value) {
+            targetSelect.value = d.id;
+        } else {
+            // If both are already selected, update the source and clear target
+            sourceSelect.value = d.id;
+            targetSelect.value = '';
+        }
     });
 
     // Button event listeners
@@ -220,7 +227,123 @@ document.addEventListener('DOMContentLoaded', function() {
         stopAnimation();
         resetCircles();
     });
+
+    // Flow rate slider value display
+    document.getElementById('flow-rate').addEventListener('input', function() {
+        document.getElementById('flow-rate-value').textContent = this.value;
+    });
+
+    // Add connection button handler
+    document.getElementById('add-connection-btn').addEventListener('click', function() {
+        const sourceId = sourceSelect.value;
+        const targetId = targetSelect.value;
+        const flowRate = parseInt(document.getElementById('flow-rate').value);
+
+        if (!sourceId || !targetId) {
+            alert('Please select both source and target circles');
+            return;
+        }
+
+        if (sourceId === targetId) {
+            alert('Source and target cannot be the same circle');
+            return;
+        }
+
+        // Check if this connection already exists
+        const connectionKey = `${sourceId}-${targetId}`;
+        if (activeConnections.has(connectionKey)) {
+            alert('This connection already exists');
+            return;
+        }
+
+        // Add the new connection
+        flows.push({ source: sourceId, target: targetId, flowRate: flowRate });
+        activeConnections.add(connectionKey);
+
+        // Update the visualization
+        updateVisualization();
+
+        // Reset the selectors
+        sourceSelect.value = '';
+        targetSelect.value = '';
+        
+        // Reset circle highlights
+        circles.selectAll('circle').attr('stroke', '#fff').attr('stroke-width', 2);
+    });
+
+    // Clear all connections button handler
+    document.getElementById('clear-connections-btn').addEventListener('click', function() {
+        // Clear all connections
+        flows.length = 0;
+        activeConnections.clear();
+
+        // Remove all flow lines and particles
+        connectionsGroup.selectAll('*').remove();
+
+        // Reset circle sizes
+        resetCircles();
+        
+        // Reset circle highlights
+        circles.selectAll('circle').attr('stroke', '#fff').attr('stroke-width', 2);
+    });
     
+    // Random connections button handler
+    document.getElementById('random-connections-btn').addEventListener('click', function() {
+        // Clear existing connections first
+        flows.length = 0;
+        activeConnections.clear();
+        connectionsGroup.selectAll('*').remove();
+        resetCircles();
+        
+        // Get all circle IDs
+        const circleIds = circleData.map(circle => circle.id);
+        
+        // Create a random number of connections (between 5-10)
+        const numConnections = 5 + Math.floor(Math.random() * 6);
+        
+        // Create random connections
+        for (let i = 0; i < numConnections; i++) {
+            // Pick random source and target
+            const sourceIndex = Math.floor(Math.random() * circleIds.length);
+            let targetIndex;
+            do {
+                targetIndex = Math.floor(Math.random() * circleIds.length);
+            } while (targetIndex === sourceIndex); // Ensure source != target
+            
+            const sourceId = circleIds[sourceIndex];
+            const targetId = circleIds[targetIndex];
+            
+            // Generate random flow rate (1-5)
+            const flowRate = 1 + Math.floor(Math.random() * 5);
+            
+            // Check if this connection already exists
+            const connectionKey = `${sourceId}-${targetId}`;
+            if (!activeConnections.has(connectionKey)) {
+                // Add the new connection
+                flows.push({ source: sourceId, target: targetId, flowRate: flowRate });
+                activeConnections.add(connectionKey);
+            }
+        }
+        
+        // Update the visualization
+        updateVisualization();
+    });
+
+    // Update the entire visualization
+    function updateVisualization() {
+        // Clear existing connections
+        connectionsGroup.selectAll('*').remove();
+        
+        // Create new flow lines
+        const flowData = createFlowLines();
+        
+        // Animate the flows
+        animateFlows(flowData);
+        
+        // Don't automatically update circle sizes when adding connections
+        // Circle sizes will only change during animation
+    }
+
     // Create flow lines between circles
     function createFlowLines() {
         // Process the flows data to include actual circle objects
@@ -234,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 particles: [] // Will store particle positions for animation
             };
         });
-        
+
         // Create the flow lines
         connectionsGroup.selectAll('.flow-line')
             .data(flowData)
@@ -246,21 +369,21 @@ document.addEventListener('DOMContentLoaded', function() {
             .attr('fill', 'none')
             .style('opacity', 0.4)
             .style('stroke-dasharray', d => `${3 + d.flowRate},${6 - d.flowRate/2}`) // Dash pattern based on flow rate
-            .attr('stroke-dashoffset', 0)
-            
+            .attr('stroke-dashoffset', 0);
+
         // Create particle groups for each flow line
         const particleGroups = connectionsGroup.selectAll('.particle-group')
             .data(flowData)
             .enter()
             .append('g')
             .attr('class', 'particle-group');
-            
+
         // Initial positioning of flow lines
         updateFlowLines();
-        
+
         return flowData;
     }
-    
+
     // Update flow line positions when circles move
     function updateFlowLines() {
         connectionsGroup.selectAll('.flow-line')
@@ -269,31 +392,31 @@ document.addEventListener('DOMContentLoaded', function() {
                 const sourceY = d.source.y;
                 const targetX = d.target.x;
                 const targetY = d.target.y;
-                
+
                 // Calculate the distance between circles
                 const dx = targetX - sourceX;
                 const dy = targetY - sourceY;
                 const distance = Math.sqrt(dx * dx + dy * dy);
-                
+
                 // Calculate the points where the line should start and end
                 // (at the edge of each circle, not the center)
                 const sourceR = parseFloat(d3.select(`g[data-id='${d.source.id}']`).select('circle').attr('r')) || d.source.baseSize;
                 const targetR = parseFloat(d3.select(`g[data-id='${d.target.id}']`).select('circle').attr('r')) || d.target.baseSize;
-                
+
                 const sourceOffsetX = sourceX + (dx * sourceR / distance);
                 const sourceOffsetY = sourceY + (dy * sourceR / distance);
                 const targetOffsetX = targetX - (dx * targetR / distance);
                 const targetOffsetY = targetY - (dy * targetR / distance);
-                
+
                 // Create a curved path
                 const midX = (sourceOffsetX + targetOffsetX) / 2;
                 const midY = (sourceOffsetY + targetOffsetY) / 2;
                 const curveFactor = 30; // Controls how much the curve bends
-                
+
                 // Perpendicular offset for the control point
                 const perpX = -dy * curveFactor / distance;
                 const perpY = dx * curveFactor / distance;
-                
+
                 // Store path data for particle animations
                 d.pathData = {
                     sourceX: sourceOffsetX,
@@ -303,11 +426,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     controlX: midX + perpX,
                     controlY: midY + perpY
                 };
-                
+
                 return `M${sourceOffsetX},${sourceOffsetY} Q${midX + perpX},${midY + perpY} ${targetOffsetX},${targetOffsetY}`;
             });
     }
-    
+
     // Animate people flowing between circles
     function animateFlows(flowData) {
         // Store circle size changes for each flow cycle
@@ -315,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
         circleData.forEach(circle => {
             sizeChanges[circle.id] = 0;
         });
-        
+
         // Animate flow lines with moving dash pattern
         connectionsGroup.selectAll('.flow-line')
             .each(function(d) {
@@ -323,10 +446,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const dashLength = parseFloat(line.style('stroke-dasharray').split(',')[0]) || 3;
                 const dashGap = parseFloat(line.style('stroke-dasharray').split(',')[1]) || 3;
                 const totalLength = dashLength + dashGap;
-                
+
                 // Animation speed based on flow rate
                 const duration = 3000 - (d.flowRate * 300); // Faster for higher flow rates
-                
+
                 function animateDashes() {
                     line.attr('stroke-dashoffset', totalLength)
                         .transition()
@@ -335,16 +458,16 @@ document.addEventListener('DOMContentLoaded', function() {
                         .attr('stroke-dashoffset', 0)
                         .on('end', animateDashes);
                 }
-                
+
                 animateDashes();
             });
-        
+
         // Create particles for each flow line
         flowData.forEach(flow => {
             // Number of particles based on flow rate
             const numParticles = flow.flowRate;
             flow.particles = [];
-            
+
             // Initialize particles at random positions along the path
             for (let i = 0; i < numParticles; i++) {
                 flow.particles.push({
@@ -353,10 +476,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     element: null
                 });
             }
-            
+
             // Create SVG elements for particles
             const particleGroup = connectionsGroup.select(`.particle-group:nth-child(${flowData.indexOf(flow) + 1})`);
-            
+
             flow.particles.forEach(particle => {
                 particle.element = particleGroup.append('circle')
                     .attr('class', 'flow-particle')
@@ -365,46 +488,46 @@ document.addEventListener('DOMContentLoaded', function() {
                     .style('opacity', 0.8);
             });
         });
-        
+
         // Animation function to update particle positions
         function animateParticles() {
             // Reset size changes for this cycle
             Object.keys(sizeChanges).forEach(id => {
                 sizeChanges[id] = 0;
             });
-            
+
             // Update each flow's particles
             flowData.forEach(flow => {
                 // Calculate speed based on flow rate (same as line animation)
                 const speed = 0.005 + (flow.flowRate * 0.002); // Faster for higher flow rates
-                
+
                 flow.particles.forEach(particle => {
                     // Update particle position along the path
                     particle.progress += speed;
-                    
+
                     // When a particle reaches the end
                     if (particle.progress >= 1) {
                         // Reset to start
                         particle.progress = 0;
                         
-                        // Track size changes: source gets smaller, target gets bigger
-                        sizeChanges[flow.source.id] -= 1;
-                        sizeChanges[flow.target.id] += 1;
+                        // We no longer record size changes for continuous animation
+                        // sizeChanges[flow.source.id] -= 1; // Source loses a person
+                        // sizeChanges[flow.target.id] += 1; // Target gains a person
                     }
-                    
-                    // Calculate position on the quadratic curve
+
+                    // Calculate position along the quadratic Bezier curve
                     if (flow.pathData) {
                         const t = particle.progress;
-                        const p = flow.pathData;
+                        const p0x = flow.pathData.sourceX;
+                        const p0y = flow.pathData.sourceY;
+                        const p1x = flow.pathData.controlX;
+                        const p1y = flow.pathData.controlY;
+                        const p2x = flow.pathData.targetX;
+                        const p2y = flow.pathData.targetY;
                         
-                        // Quadratic Bezier formula: B(t) = (1-t)²P₀ + 2(1-t)tP₁ + t²P₂
-                        const x = Math.pow(1-t, 2) * p.sourceX + 
-                                2 * (1-t) * t * p.controlX + 
-                                Math.pow(t, 2) * p.targetX;
-                                
-                        const y = Math.pow(1-t, 2) * p.sourceY + 
-                                2 * (1-t) * t * p.controlY + 
-                                Math.pow(t, 2) * p.targetY;
+                        // Quadratic Bezier formula: B(t) = (1-t)Â²Pâ‚€ + 2(1-t)tPâ‚ + tÂ²Pâ‚‚
+                        const x = Math.pow(1-t, 2) * p0x + 2 * (1-t) * t * p1x + Math.pow(t, 2) * p2x;
+                        const y = Math.pow(1-t, 2) * p0y + 2 * (1-t) * t * p1y + Math.pow(t, 2) * p2y;
                         
                         // Update particle position
                         particle.element
@@ -413,38 +536,107 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
             });
+
+            // Update circle sizes based on flow
+            updateCircleSizesFromFlow(sizeChanges);
             
-            // Apply size changes to circles
-            circles.each(function(d) {
-                if (sizeChanges[d.id] !== 0) {
-                    const circle = d3.select(this).select('circle');
-                    const text = d3.select(this).select('text');
-                    const currentSize = parseFloat(circle.attr('r'));
-                    
-                    // Change size based on flow (max 10% change per cycle)
-                    const sizeChange = Math.min(Math.max(sizeChanges[d.id], -2), 2);
-                    const newSize = Math.max(d.baseSize * 0.5, Math.min(d.baseSize * 1.5, currentSize + sizeChange));
-                    
-                    circle.transition()
-                        .duration(500)
-                        .attr('r', newSize);
-                        
-                    text.transition()
-                        .duration(500)
-                        .attr('font-size', Math.max(10, newSize / 5));
-                }
-            });
+            // Continue animation
+            requestAnimationFrame(animateParticles);
         }
+
+        // Start the animation
+        animateParticles();
+    }
+
+    // Update circle sizes based on flow changes
+    function updateCircleSizesFromFlow(sizeChanges) {
+        // We've disabled continuous size changes
+        // The initial size adjustment is done by adjustCircleSizesBasedOnConnections
+        // This function is now a no-op to prevent further size changes
+        return;
+    }
+
+    // Update circle sizes based on connections
+    function updateCircleSizes() {
+        // Calculate net flow for each circle
+        const netFlows = {};
+        circleData.forEach(circle => {
+            netFlows[circle.id] = 0;
+        });
         
-        // Run the animation loop for particles
-        setInterval(animateParticles, 100);
+        // Calculate outgoing and incoming flows
+        flows.forEach(flow => {
+            netFlows[flow.source] -= flow.flowRate;
+            netFlows[flow.target] += flow.flowRate;
+        });
+        
+        // Update circle sizes based on net flow
+        circles.each(function(d) {
+            const circle = d3.select(this).select('circle');
+            const text = d3.select(this).select('text');
+            
+            // Calculate size factor based on net flow
+            // Positive net flow = circle grows, negative = circle shrinks
+            const netFlow = netFlows[d.id];
+            const sizeFactor = 1 + (netFlow * 0.05); // 5% change per flow unit
+            
+            // Calculate new size (clamped between 50% and 200% of base size)
+            const newSize = Math.max(d.baseSize * 0.5, Math.min(d.baseSize * 2, d.baseSize * sizeFactor));
+            
+            // Animate to new size
+            circle.transition()
+                .duration(1000)
+                .attr('r', newSize);
+                
+            // Update text size proportionally
+            text.transition()
+                .duration(1000)
+                .attr('font-size', Math.max(10, newSize / 5));
+        });
     }
     
-    // Create flow lines and start animation
-    const flowData = createFlowLines();
-    animateFlows(flowData);
+    // Adjust circle sizes based on connections when animation starts
+    function adjustCircleSizesBasedOnConnections() {
+        // Calculate initial size adjustments for each circle
+        const sizeAdjustments = {};
+        circleData.forEach(circle => {
+            sizeAdjustments[circle.id] = 0;
+        });
+        
+        // For each flow, make source smaller and target bigger
+        flows.forEach(flow => {
+            // Source gets smaller based on flow rate
+            sizeAdjustments[flow.source] -= flow.flowRate * 0.1; // 10% reduction per flow unit
+            
+            // Target gets bigger based on flow rate
+            sizeAdjustments[flow.target] += flow.flowRate * 0.1; // 10% increase per flow unit
+        });
+        
+        // Apply size adjustments to circles
+        circles.each(function(d) {
+            const adjustment = sizeAdjustments[d.id];
+            if (adjustment !== 0) {
+                const circle = d3.select(this).select('circle');
+                const text = d3.select(this).select('text');
+                
+                // Calculate new size (clamped between 50% and 200% of base size)
+                const sizeFactor = 1 + adjustment;
+                const newSize = Math.max(d.baseSize * 0.5, Math.min(d.baseSize * 2, d.baseSize * sizeFactor));
+                
+                // Animate to new size
+                circle.transition()
+                    .duration(1000)
+                    .attr('r', newSize);
+                    
+                // Update text size proportionally
+                text.transition()
+                    .duration(1000)
+                    .attr('font-size', Math.max(10, newSize / 5));
+            }
+        });
+    }
 
-    // Function to wrap text
+    // Text wrapping function for circle labels
     function wrapText(text, width) {
         text.each(function() {
             const text = d3.select(this);
@@ -493,6 +685,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Hide tooltip during drag
         tooltip.style('opacity', 0);
+        
+        // Update flow lines if they exist
+        if (flows.length > 0) {
+            updateFlowLines();
+        }
     }
     
     function dragEnded(event, d) {
@@ -508,57 +705,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         d3.select(this).attr('transform', `translate(${d.x}, ${d.y})`);
         
-        // Update flow lines positions
-        updateFlowLines();
+        // Update flow lines if they exist
+        if (flows.length > 0) {
+            updateFlowLines();
+        }
     }
-
-    // Add manual control for individual circles
-    const controlPanel = d3.select('.controls');
-    
-    controlPanel.append('div')
-        .attr('class', 'size-controls')
-        .html('<label>Manual Size Control: </label>');
-    
-    const sizeSlider = controlPanel.select('.size-controls')
-        .append('input')
-        .attr('type', 'range')
-        .attr('min', 0.5)
-        .attr('max', 2)
-        .attr('step', 0.1)
-        .attr('value', 1);
-        
-    const circleSelector = controlPanel.select('.size-controls')
-        .append('select');
-        
-    circleSelector.append('option')
-        .attr('value', 'all')
-        .text('All Circles');
-        
-    circleData.forEach(d => {
-        circleSelector.append('option')
-            .attr('value', d.id)
-            .text(d.name.split('\\n')[0]);
-    });
-    
-    sizeSlider.on('input', function() {
-        const value = parseFloat(this.value);
-        const selected = circleSelector.property('value');
-        
-        circles.each(function(d) {
-            if (selected === 'all' || selected === d.id) {
-                const circle = d3.select(this).select('circle');
-                const text = d3.select(this).select('text');
-                
-                const newSize = d.baseSize * value;
-                
-                circle.transition()
-                    .duration(100)
-                    .attr('r', newSize);
-                    
-                text.transition()
-                    .duration(100)
-                    .attr('font-size', Math.max(10, newSize / 5));
-            }
-        });
-    });
 });
